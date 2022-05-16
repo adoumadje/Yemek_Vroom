@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "693754074537",
+    "project_id": "yemek-vroom",
+    "storage_bucket": "yemek-vroom.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:693754074537:android:887a272b0991b0cb0fe0b8",
+        "android_client_info": {
+          "package_name": "com.example.yemekvroom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "693754074537-e69ct8j7j5loska73bmmes2ffl12c0lm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9IBULO-9RqJOD_XGeylicJRaSF9WgZxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "693754074537-e69ct8j7j5loska73bmmes2ffl12c0lm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
