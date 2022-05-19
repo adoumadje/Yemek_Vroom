@@ -1,16 +1,25 @@
 package com.example.yemekvroom;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.yemekvroom.adapters.RestaurantListAdapter;
 import com.example.yemekvroom.models.Restaurant;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 
@@ -26,68 +35,60 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RestaurantListAdapter.RestaurantListClickListener {
 
-    Button btnFirebase;
+    int COLLECTION_SIZE = 4;
+    Restaurant restaurant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnFirebase = findViewById(R.id.btn_Firebase);
-        btnFirebase.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendToFirebase();
-            }
-        });
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("Restaurants List");
+
+        getAndDisplayRestaurantList();
     }
 
-    private List<Restaurant> getRestaurantsListFromJSON() {
-        InputStream inputStream = getResources().openRawResource(R.raw.restaurants);
-        Writer writer = new StringWriter();
-        char[] buffer = new char[1024];
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(inputStream,"UTF-8"));
-            int n;
-            while ((n=reader.read(buffer)) != -1) {
-                writer.write(buffer,0,n);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String jsonStr = writer.toString();
-        Gson gson = new Gson();
-        Restaurant[] restaurants = gson.fromJson(jsonStr,Restaurant[].class);
-        List<Restaurant> restaurantList = Arrays.asList(restaurants);
-        return restaurantList;
+    private void initRecylerView(List<Restaurant> restaurantList) {
+        RecyclerView recyclerView = findViewById(R.id.rv_RestaurantList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        RestaurantListAdapter adapter = new RestaurantListAdapter(restaurantList, this);
+        recyclerView.setAdapter(adapter);
     }
 
-    private void sendToFirebase() {
-        List<Restaurant> restaurantList = getRestaurantsListFromJSON();
+    private void getAndDisplayRestaurantList() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String DOCUMENT_ID;
-        Restaurant restaurant;
-        for (int i = 0; i < restaurantList.size(); ++i) {
-            restaurant = restaurantList.get(i);
-            DOCUMENT_ID = "Restuarant"+i;
-            db.collection("Restaurants").document(DOCUMENT_ID).set(restaurant)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+        DocumentReference restaurantRef;
+        List<Restaurant> restaurantList = new ArrayList<>();
+        for (int i = 0; i < COLLECTION_SIZE; ++i) {
+            restaurantRef = db.document("Restaurants/Restuarant"+i);
+            restaurantRef.get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
-                        public void onSuccess(Void unused) {
-                            Toast.makeText(MainActivity.this,
-                                    "Successfully Saved", Toast.LENGTH_SHORT).show();
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            restaurant = documentSnapshot.toObject(Restaurant.class);
+                            restaurantList.add(restaurant);
+                            if(restaurantList.size() == COLLECTION_SIZE){
+                                initRecylerView(restaurantList);
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Toast.makeText(MainActivity.this,
-                                    "Failed to save", Toast.LENGTH_SHORT).show();
+                                    "Failed reading data", Toast.LENGTH_SHORT).show();
                         }
                     });
         }
-        btnFirebase.setEnabled(false);
+    }
+
+    @Override
+    public void onItemClick(Restaurant restaurant) {
+        Intent intent = new Intent(MainActivity.this, RestaurantMenuActivity.class);
+        intent.putExtra("Restaurant", restaurant);
+        startActivity(intent);
     }
 }

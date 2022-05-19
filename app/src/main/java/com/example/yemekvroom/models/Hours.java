@@ -1,5 +1,10 @@
 package com.example.yemekvroom.models;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 public class Hours {
     private String Sunday;
     private String Monday;
@@ -63,5 +68,21 @@ public class Hours {
 
     public void setSaturday(String saturday) {
         Saturday = saturday;
+    }
+
+    public String getTodayHour() {
+        Calendar calendar = Calendar.getInstance();
+        Date date = calendar.getTime();
+        String day = new SimpleDateFormat("EEEE", Locale.ENGLISH).format(date.getTime());
+        switch (day) {
+            case "Sunday": return this.Sunday;
+            case "Monday": return this.Monday;
+            case "Tuesday": return this.Tuesday;
+            case "Wednesday": return this.Wednesday;
+            case "Thursday": return this.Thursday;
+            case "Friday": return this.Friday;
+            case "Saturday": return this.Saturday;
+            default: return this.Sunday;
+        }
     }
 }
